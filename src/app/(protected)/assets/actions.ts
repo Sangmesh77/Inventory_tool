@@ -32,32 +32,33 @@ function statusField(formData: FormData) {
 }
 
 export async function createAsset(formData: FormData) {
-  await requireRole("ADMIN");
+  const user = await requireRole("ADMIN");
+  const assetTag = `IL-${globalThis.crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
   const asset = await prisma.asset.create({
     data: {
-      assetTag: stringField(formData, "assetTag"),
+      assetTag,
       name: stringField(formData, "name"),
       type: stringField(formData, "type"),
       serialNumber: stringField(formData, "serialNumber"),
       location: stringField(formData, "location"),
-      status: statusField(formData),
+      status: AssetStatus.AVAILABLE,
       groupId: optionalStringField(formData, "groupId"),
-      ownerId: optionalStringField(formData, "ownerId"),
     },
   });
 
   await prisma.assetHistory.create({
     data: {
       assetId: asset.id,
-      changedById: asset.ownerId,
+      changedById: user.id,
       newStatus: asset.status,
       note: "Asset created by administrator",
     },
   });
 
   revalidatePath("/assets");
-  redirect("/assets");
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
 }
 
 export async function updateAsset(assetId: string, formData: FormData) {

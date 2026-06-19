@@ -1,4 +1,4 @@
-import { AssetStatus, PrismaClient } from "@prisma/client";
+import { AssetStatus, PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -25,18 +25,28 @@ async function main() {
   const [ada, grace] = await Promise.all([
     prisma.user.upsert({
       where: { email: "ada.lovelace@inventorylab.local" },
-      update: {},
+      update: {
+        supabaseUserId: "00000000-0000-4000-8000-000000000001",
+        role: Role.ADMIN,
+      },
       create: {
+        supabaseUserId: "00000000-0000-4000-8000-000000000001",
         email: "ada.lovelace@inventorylab.local",
         name: "Ada Lovelace",
+        role: Role.ADMIN,
       },
     }),
     prisma.user.upsert({
       where: { email: "grace.hopper@inventorylab.local" },
-      update: {},
+      update: {
+        supabaseUserId: "00000000-0000-4000-8000-000000000002",
+        role: Role.USER,
+      },
       create: {
+        supabaseUserId: "00000000-0000-4000-8000-000000000002",
         email: "grace.hopper@inventorylab.local",
         name: "Grace Hopper",
+        role: Role.USER,
       },
     }),
   ]);
