@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum AssetStatus {
+  AVAILABLE
+  IN_USE
+  LOST
+  DISPOSED
+}
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  supabaseUserId String   @unique @db.Uuid
+  email          String   @unique
+  name           String
+  role           Role     @default(USER)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  assets       Asset[]
+  assetHistory AssetHistory[]
+
+  @@index([role])
+  @@map("users")
+}
+
+model AssetGroup {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assets Asset[]
+
+  @@map("asset_groups")
+}
+
+model Asset {
+  id           String      @id @default(uuid()) @db.Uuid
+  assetTag     String      @unique
+  name         String
+  type         String
+  serialNumber String      @unique
+  location     String
+  status       AssetStatus @default(AVAILABLE)
+  ownerId      String?     @db.Uuid
+  groupId      String?     @db.Uuid
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  owner   User?       @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  group   AssetGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  history AssetHistory[]
+
+  @@index([ownerId])
+  @@index([groupId])
+  @@index([status])
+  @@map("assets")
+}
+
+model AssetHistory {
+  id             String      @id @default(uuid()) @db.Uuid
+  assetId        String      @db.Uuid
+  changedById    String?     @db.Uuid
+  previousStatus AssetStatus?
+  newStatus      AssetStatus
+  note           String?
+  createdAt      DateTime    @default(now())
+
+  asset     Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  changedBy User? @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@index([assetId])
+  @@index([changedById])
+  @@index([newStatus])
+  @@map("asset_history")
+}
