@@ -3,6 +3,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const user = await requireUser();
   const [totalAssets, availableAssets, myAssets] = await Promise.all([
