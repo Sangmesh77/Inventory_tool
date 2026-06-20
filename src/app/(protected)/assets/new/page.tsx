@@ -8,6 +8,8 @@ import { Select } from "@/components/ui/select";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export default async function NewAssetPage() {
   await requireRole("ADMIN");
   const groups = await prisma.assetGroup.findMany({ orderBy: { name: "asc" } });

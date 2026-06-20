@@ -4,6 +4,8 @@ import { updateAsset } from "../../actions";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export default async function EditAssetPage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole("ADMIN");
   const { id } = await params;

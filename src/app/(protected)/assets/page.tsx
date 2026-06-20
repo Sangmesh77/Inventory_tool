@@ -4,6 +4,8 @@ import { acquireAsset, releaseAsset } from "./actions";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AssetsPage() {
   const user = await requireUser();
   const assets = await prisma.asset.findMany({
